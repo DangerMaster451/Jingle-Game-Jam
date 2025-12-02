@@ -31,6 +31,7 @@ class GameObject():
 
 class Player(GameObject):
     def __init__(self, x:float, y:float) -> None:
+       self.health = 100
        GameObject.__init__(self, x, y, 0, 100, 30, "Assets/Evil Snowman.png", (100,100))
 
     def update_position(self) -> None:
@@ -51,6 +52,7 @@ class Player(GameObject):
 
 class Snowball(GameObject):
     def __init__(self, x:float, y:float, direction:float) -> None:
+        self.damage = 15
         super().__init__(x, y, direction, 300, 15, "Assets/Snowball.png")
 
     def update_position(self) -> None:
@@ -62,15 +64,16 @@ class Snowball(GameObject):
 
 class Enemy(GameObject):
     def __init__(self, x:float, y:float):
+        self.health = 30
         super().__init__(x, y, 0, 75, 20, "Assets/Evil Snowman.png", (100,100))
         enemies.append(self)
 
-    def check_collisions(self, gameObjects) -> bool:
+    def check_collisions(self, gameObjects) -> GameObject | None:
         for object in gameObjects:
             if type(object) == Snowball:
                 if self.getDistanceBetweenObjects(self, object) < self.hitboxRadius + object.hitboxRadius:
-                    return True
-        return False
+                    return object
+        return None
 
     def render(self, screen:pygame.Surface):
         pygame.draw.circle(screen, "white", (self.x, self.y), 20)
@@ -223,11 +226,15 @@ while running:
 
     for enemy in enemies:
         enemy.move_toward_object(p)
-        if enemy.check_collisions(gameObjects):
-            spawnIceBloodCloud(enemy.x, enemy.y, 35, 75, 10, 125)
-            Pickup(enemy.x, enemy.y)
-            enemies.remove(enemy)
-            gameObjects.remove(enemy)
+        o = enemy.check_collisions(gameObjects)
+        if o != None:
+            enemy.health -= o.damage
+            gameObjects.remove(o)
+            if enemy.health <= 0:
+                spawnIceBloodCloud(enemy.x, enemy.y, 35, 75, 10, 125)
+                Pickup(enemy.x, enemy.y)
+                enemies.remove(enemy)
+                gameObjects.remove(enemy)
 
     object = p.check_collisions(gameObjects)
     if type(object) == Enemy:
