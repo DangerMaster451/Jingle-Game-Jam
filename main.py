@@ -5,7 +5,6 @@ import pygame
 import random
 import math
 
-
 def spawnEnemies(player:Player, enemies:list, max_enemies, spawn_radius):
     if len(enemies) < max_enemies:
         direction = random.randint(0,360)
@@ -51,7 +50,7 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
-#objects
+#object lists
 gameObjects:list[GameObject] = []
 upgrades:list[Upgrade] = []
 enemies:list[Enemy] = []
@@ -95,9 +94,17 @@ while running:
 
     object = p.check_collisions(gameObjects)
     if type(object) == Enemy:
-        spawnBloodCloud(p.x, p.y, 35, 75, 10, 125)
-        pygame.time.wait(2000)
-        running = False
+        spawnBloodCloud(p.x, p.y, 15, 35, 10, 25)
+        p.health -= object.damage
+        gameObjects.remove(object)
+        enemies.remove(object)
+
+        if p.health <= 0:
+            spawnBloodCloud(p.x, p.y, 25, 75, 10, 75)
+            if p in gameObjects:
+                gameObjects.remove(p)
+                upgrades.clear()
+
     elif type(object) == Pickup:
         gameObjects.remove(object)
 

@@ -65,6 +65,7 @@ class Snowball(GameObject):
 class Enemy(GameObject):
     def __init__(self, x:float, y:float, gameObjects:list[GameObject], enemies:list[Enemy]):
         self.health = 30
+        self.damage = 25
         super().__init__(x, y, 0, 75, 20, "Assets/Evil Snowman.png", (100,100), gameObjects)
         enemies.append(self)
 
